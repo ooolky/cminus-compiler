@@ -59,7 +59,8 @@ void display(struct ASTNode *T,int indent) {
             break;
 	    case PARAM_LIST:    
             display(T->ptr[0], indent);         //PARAM_DEC|ARRAY_PARAM
-            display(T->ptr[1], indent);         //PARAM_LIST
+            display(T->ptr[1], indent);         
+            
             break;
 	    case PARAM_DEC:          
             printf("%*cNAME:%s,TYPE:%s\n", indent, ' ', T->type_id, T->ptr[0]->type_id);
@@ -259,6 +260,14 @@ void display(struct ASTNode *T,int indent) {
             printf("%*cARRAY_SUB_LIST:\n", indent+3, ' '); 
             display(T->ptr[1], indent+6);
             break;
+        case DIMENSION: ````````
+             printf("%*cID:  %s\n",indent,' ',T->type_id);
+             display(T->ptr[0],indent);
+             break;
+        case DIMENSION_LIST: 
+             printf("%*:  %s\n",indent,' ',T->type_int);
+             display(T->ptr[1],indent);
+             break;
         }
     }
 }

@@ -2,7 +2,6 @@
 %locations
 %{
 #include "def.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
@@ -26,21 +25,20 @@ extern int hasError;
 
 //%type 定义非终结符的语义值类型
 %type  <ptr> Program ExtDefList ExtDef Specifier ExtDecList FuncDec CompSt ParamList VarDec ParamDec Stmt StmList VarDecList Exp Args
-%type  <ptr> ArrayDec ArraySubList ArrayInitList
+%type  <ptr> ArrayDec ArraySubList ArrayInitList DimensionList
 
 //%token 定义终结符的语义值类型
-%token <type_int> INT                       /*指定INT的语义值是type_int，由词法分析得到的数值*/
-%token <type_id> ID RELOP TYPE COMP_ASSIGN  /*指定ID,RELOP 的语义值是type_id，由词法分析得到的标识符字符串*/
-%token <type_float> FLOAT                   /*指定ID的语义值是type_id，由词法分析得到的标识符字符串*/
+%token <type_int> INT                       
+%token <type_id> ID RELOP TYPE COMP_ASSIGN  
+%token <type_float> FLOAT                   
 %token <type_char> CHAR
 
-%token LP RP LC RC LS RS SEMI COMMA         /*用bison对该文件编译时，带参数-d，生成的.tab.h中给这些单词进行编码，可在lex.l中包含parser.tab.h使用这些单词种类码*/
+%token LP RP LC RC LS RS SEMI COMMA         
 %token PLUS MINUS STAR DIV MOD ASSIGNOP AND OR NOT
 %token BITAND BITOR BITXOR BITSHL BITSHR
 %token IF ELSE WHILE RETURN CONTINUE BREAK
-/*以下为接在上述token后依次编码的枚举常量，作为AST结点类型标记*/
 %token EXT_DEF_LIST EXT_VAR_DEF FUNC_DEF FUNC_DEC EXT_DEC_LIST PARAM_LIST PARAM_DEC VAR_DEF VAR_DEC VAR_DEC_LIST COMP_STM STM_LIST EXP_STMT IF_THEN IF_THEN_ELSE
-%token FUNC_CALL ARGS ARRAY_DEC ARRAY_REF ARRAY_SUB_LIST ARRAY_INIT_LIST ARRAY_PARAM
+%token FUNC_CALL ARGS ARRAY_DEC ARRAY_REF ARRAY_SUB_LIST ARRAY_INIT_LIST ARRAY_PARAM DIMENSION DIMENSION_LIST
 %token VAR PARAM FUNC ARG VOID ARRAY 
 %token LABEL GOTO
 %token EQ NEQ LT LE GT GE
@@ -63,13 +61,8 @@ extern int hasError;
 %%
 
 Program: ExtDefList {
-    //#ifdef DEBUG
     display($1, 0);
-    //#endif
     analysis($1);
-    //#ifdef DEBUG
-    display($1, 0);
-    //#endif
     if (hasError) {
         fprintf(stderr, "Detect fatal errors, compiler terminated!\n");
         exit(-1);
@@ -78,18 +71,18 @@ Program: ExtDefList {
 ;
 
 ExtDefList: { $$ = NULL; }
-| ExtDef ExtDefList { $$ = mknode(2, EXT_DEF_LIST, yylineno, $1, $2); }               //每一个ExtDefList的结点，其第1棵子树对应一个外部变量声明或函数
+| ExtDef ExtDefList { $$ = mknode(2, EXT_DEF_LIST, yylineno, $1, $2); }              
 ;
 
-ExtDef: Specifier ExtDecList SEMI { $$ = mknode(2, EXT_VAR_DEF, yylineno, $1, $2); }   //该结点对应一个外部变量声明
-| Specifier FuncDec CompSt { $$ = mknode(3, FUNC_DEF, yylineno, $1, $2, $3); }       //该结点对应一个函数定义
+ExtDef: Specifier ExtDecList SEMI { $$ = mknode(2, EXT_VAR_DEF, yylineno, $1, $2); }   
+| Specifier FuncDec CompSt { $$ = mknode(3, FUNC_DEF, yylineno, $1, $2, $3); }       
 | error SEMI { $$ = NULL; }
 ;
 
 Specifier: TYPE { $$ = mknode(0, TYPE, yylineno); strcpy($$->type_id, $1);}   
 ;
 
-ExtDecList: VarDec { $$ = mknode(1, EXT_DEC_LIST, yylineno, $1); }       /*每一个EXT_DECLIST的结点，其第一棵子树对应一个变量名(ID类型的结点),第二棵子树对应剩下的外部变量名*/
+ExtDecList: VarDec { $$ = mknode(1, EXT_DEC_LIST, yylineno, $1); }      
 | VarDec COMMA ExtDecList { $$ = mknode(2, EXT_DEC_LIST, yylineno, $1, $3); }
 | ArrayDec { $$ = mknode(1, EXT_DEC_LIST, yylineno, $1); }
 | ArrayDec COMMA ExtDecList { $$ = mknode(2, EXT_DEC_LIST, yylineno, $1, $3); }
@@ -97,10 +90,11 @@ ExtDecList: VarDec { $$ = mknode(1, EXT_DEC_LIST, yylineno, $1); }       /*每�
 
 VarDec: ID { $$ = mknode(0, VAR_DEC, yylineno); strcpy($$->type_id, $1); }
 | ID ASSIGNOP Exp { $$ = mknode(1, VAR_DEC, yylineno, $3); strcpy($$->type_id, $1); }
+| ID DimensionList {$$=mknode(1,DIMENSION,yylineno,$2);strcpy($$->type_id,$1);}
 ;
 
-FuncDec: ID LP ParamList RP { $$ = mknode(1, FUNC_DEC, yylineno, $3); strcpy($$->type_id, $1); }  //函数名存放在$$->type_id
-| ID LP RP { $$ = mknode(0, FUNC_DEC, yylineno); strcpy($$->type_id, $1); $$->ptr[0] = NULL; }  //函数名存放在$$->type_id
+FuncDec: ID LP ParamList RP { $$ = mknode(1, FUNC_DEC, yylineno, $3); strcpy($$->type_id, $1); }  
+| ID LP RP { $$ = mknode(0, FUNC_DEC, yylineno); strcpy($$->type_id, $1); $$->ptr[0] = NULL; }  
 ;
 
 ParamList: ParamDec { $$ = mknode(1, PARAM_LIST, yylineno, $1); }
@@ -137,10 +131,10 @@ VarDecList: VarDec { $$ = mknode(1, VAR_DEC_LIST, yylineno, $1); }
 | ArrayDec COMMA ExtDecList { $$ = mknode(2, VAR_DEC_LIST, yylineno, $1, $3); }
 ;
 
-Exp: Exp ASSIGNOP Exp { $$ = mknode(2, ASSIGNOP, yylineno, $1, $3); }//$$结点type_id空置未用，正好存放运算符
+Exp: Exp ASSIGNOP Exp { $$ = mknode(2, ASSIGNOP, yylineno, $1, $3); }
 | Exp AND Exp { $$ = mknode(2, AND, yylineno, $1, $3); }
 | Exp OR Exp { $$ = mknode(2, OR, yylineno, $1, $3); }
-| Exp RELOP Exp { $$ = mknode(2, RELOP, yylineno, $1, $3); strcpy($$->type_id, $2); }  //词法分析关系运算符号自身值保存在$2中
+| Exp RELOP Exp { $$ = mknode(2, RELOP, yylineno, $1, $3); strcpy($$->type_id, $2); }  
 | Exp PLUS Exp { $$ = mknode(2, PLUS, yylineno, $1, $3); }
 | Exp MINUS Exp { $$ = mknode(2, MINUS, yylineno, $1, $3); }
 | Exp STAR Exp { $$ = mknode(2, STAR, yylineno, $1, $3); }
@@ -184,6 +178,10 @@ ArraySubList: LS Exp RS { $$ = mknode(1, ARRAY_SUB_LIST, yylineno, $2); }
 
 ArrayInitList: LC Args RC { $$ = mknode(1, ARRAY_INIT_LIST, yylineno, $2); }
 ;
+
+DimensionList:LB INT RB {$$=mknode(1,DIMENSION_LIST,yylineno,$2);$$->type_int=$2;}
+ |LB INT RB DimensionList {$$=mknode(2,DIMENSION_LIST,yylineno,$2,$4);$$->type_int=$2;}
+ ;
        
 %%
 

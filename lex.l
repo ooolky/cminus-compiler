@@ -1,7 +1,5 @@
 %{
 #include "parser.tab.h"
-#include "utils.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -13,321 +11,231 @@ extern "C" int yylex();
 
 id   	[A-Za-z_][A-Za-z0-9_]*  
 int    	[0-9]+
-hex     0[xX][0-9a-fA-F]+
 float  	[0-9]*\.[0-9]+|[0-9]+\.
-expo    [Ee][+-]?[0-9]+
 char    '([ -&(-[\]-~]|(\\([abfnrtv\\?'"0]|([0-3][0-7][0-7])|(x[0-9a-fA-F][0-9a-fA-F]))))'
 lcomment \/\/[^\n]*
 bcomment \/\*([^\*]|(\*)*[^\*/])*(\*)*\*\/
 invalid_char '([ -&(-[\]-~]|(\\([abfnrtv\\?'"0]|([0-3][0-7][0-7])|(x[0-9a-fA-F][0-9a-fA-F]))))[^']+(')?
 
 %%
-{lcomment} {
-    #ifdef DEBUG
-    printf("(LCOMMENT, %s)\n", yytext);
-    #endif
-}
+{lcomment} {   printf("(LCOMMENT, %s)\n", yytext);    }
 
-{bcomment} {
-    #ifdef DEBUG
-    printf("(BCOMMENT, %s)\n", yytext);
-    #endif
-}
+{bcomment} {   printf("(BCOMMENT, %s)\n", yytext);   }
 
-{int}|{hex}	{
-    #ifdef DEBUG
+{int}	{
     printf("(INT, %s)\n", yytext);
-    #endif
-    yylval.type_int=atoi_(yytext);
+    yylval.type_int=atoi(yytext);
     return INT;
 }
 
-{float}|(({int}|{float}){expo}) {
-    #ifdef DEBUG
+{float} {
     printf("(FLOAT, %s)\n", yytext);
-    #endif
     yylval.type_float=atof(yytext);
     return FLOAT; 
 }
 
 {char} {
-    #ifdef DEBUG
     printf("(CHAR, %s)\n", yytext);
-    #endif
     yytext[strlen(yytext)-1]=0; 
-    yylval.type_char=atoc(yytext+1);
+    yylval.type_char=atol(yytext+1);
     return CHAR; 
 }
 
 "int" {
-    #ifdef DEBUG
     printf("(TYPE, %s)\n", yytext);
-    #endif
     strcpy(yylval.type_id, yytext); 
     return TYPE; 
 }
 
 "float"	{
-    #ifdef DEBUG
     printf("(TYPE, %s)\n", yytext);
-    #endif
     strcpy(yylval.type_id, yytext); 
     return TYPE; 
 }
 
 "char" {
-    #ifdef DEBUG
     printf("(TYPE, %s)\n", yytext);
-    #endif
     strcpy(yylval.type_id, yytext); 
     return TYPE; 
 }
 
 "void" {
-    #ifdef DEBUG
     printf("(TYPE, %s)\n", yytext);
-    #endif
     strcpy(yylval.type_id, yytext); 
     return TYPE; 
 }
 
 "return" {
-    #ifdef DEBUG
     printf("(RETURN, -)\n");
-    #endif
     return RETURN; 
 }
 
 "if" {
-    #ifdef DEBUG
     printf("(IF, -)\n");
-    #endif
     return IF; 
 }
 
 "else" { 
-    #ifdef DEBUG
     printf("(ELSE, -)\n"); 
-    #endif
     return ELSE; 
 }
 
-"while" {
-    #ifdef DEBUG
-    printf("(WHILE, -)\n"); 
-    #endif
+"while" {   
+    printf("(WHILE, -)\n");    
     return WHILE; 
 }
 
-"continue" {
-    #ifdef DEBUG
-    printf("(CONTINUE, -)\n"); 
-    #endif
+"continue" {  
+    printf("(CONTINUE, -)\n");    
     return CONTINUE; 
 }
 
-"break" {
-    #ifdef DEBUG
-    printf("(BREAK, -)\n"); 
-    #endif
+"break" {  
+    printf("(BREAK, -)\n");   
     return BREAK; 
 }
 
-{id} { 
-    #ifdef DEBUG
-    printf("(ID, %s)\n", yytext); 
-    #endif
+{id} {   
+    printf("(ID, %s)\n", yytext);  
     strncpy(yylval.type_id, yytext, 31); 
     return ID; 
 }
 
-";"	{
-    #ifdef DEBUG
-    printf("(SEMI, -)\n"); 
-    #endif
+";"	{  
+    printf("(SEMI, -)\n");   
     return SEMI; 
 }
 
-","	{ 
-    #ifdef DEBUG
-    printf("(COMMA, -)\n"); 
-    #endif
+","	{   
+    printf("(COMMA, -)\n");    
     return COMMA; 
 }
 
-"=="|"!="|">="|"<="|">"|"<"	{
-    #ifdef DEBUG
-    printf("(RELOP, %s)\n", yytext); 
-    #endif
+"=="|"!="|">="|"<="|">"|"<"	{  
+    printf("(RELOP, %s)\n", yytext);   
     strcpy(yylval.type_id, yytext); 
     return RELOP; 
 }
 
-"+="|"-="|"*="|"/="|"%="|"&="|"|="|"^="|"<<="|">>=" {
-    #ifdef DEBUG
-    printf("(COMP_ASSIGN, %s)\n", yytext); 
-    #endif
+"+="|"-="|"*="|"/="|"%="|"&="|"|="|"^="|"<<="|">>=" {  
+    printf("(COMP_ASSIGN, %s)\n", yytext);   
     strcpy(yylval.type_id, yytext); 
     return COMP_ASSIGN; 
 }
 
 "="	{ 
-    #ifdef DEBUG
-    printf("(ASSIGNOP, -)\n"); 
-    #endif
+     printf("(ASSIGNOP, -)\n");   
     return ASSIGNOP; 
 }
 
-"+"	{ 
-    #ifdef DEBUG
-    printf("(PLUS, -)\n"); 
-    #endif
+"+"	{   
+    printf("(PLUS, -)\n");  
     return PLUS; 
 }
 
-"-"	{
-    #ifdef DEBUG 
-    printf("(MINUS, -)\n"); 
-    #endif
+"-"	{   
+    printf("(MINUS, -)\n");  
     return MINUS; 
 }
 
-"*"	{
-    #ifdef DEBUG 
-    printf("(STAR, -)\n"); 
-    #endif
+"*"	{  
+    printf("(STAR, -)\n");   
     return STAR; 
 }
 
-"/"	{ 
-    #ifdef DEBUG
-    printf("(DIV, -)\n"); 
-    #endif
+"/"	{   
+    printf("(DIV, -)\n");  
     return DIV; 
 }
 
-"%"	{ 
-    #ifdef DEBUG
-    printf("(MOD, -)\n");
-    #endif 
+"%"	{   
+   printf("(MOD, -)\n");   
     return MOD; 
 }
 
 "&" { 
-    #ifdef DEBUG
-    printf("(BITAND, -)\n"); 
-    #endif
+     printf("(BITAND, -)\n");   
     return BITAND; 
 }
 
-"|" { 
-    #ifdef DEBUG
-    printf("(BITOR, -)\n"); 
-    #endif
+"|" {   
+    printf("(BITOR, -)\n");  
     return BITOR; 
 }
 
-"^" { 
-    #ifdef DEBUG
-    printf("(BITXOR, -)\n"); 
-    #endif
+"^" {   
+    printf("(BITXOR, -)\n");   
     return BITXOR; 
 }
 
-"<<" { 
-    #ifdef DEBUG
+"<<" {  
     printf("(BITSHL, -)\n"); 
-    #endif
     return BITSHL; 
 }
 
 ">>" { 
-    #ifdef DEBUG
     printf("(BITSHR, -)\n"); 
-    #endif
     return BITSHR; 
 }
 
-"++" { 
-    #ifdef DEBUG
+"++" {  
     printf("(DPLUS, -)\n"); 
-    #endif
     return DPLUS; 
 }
 
 "--" { 
-    #ifdef DEBUG
     printf("(DMINUS, -)\n"); 
-    #endif
     return DMINUS; 
 }
 
 "&&" { 
-    #ifdef DEBUG
     printf("(AND, -)\n"); 
-    #endif
     return AND; 
 }
 
 "||" { 
-    #ifdef DEBUG
     printf("(OR, -)\n"); 
-    #endif
     return OR; 
 }
 
 "!"	{ 
-    #ifdef DEBUG
     printf("(NOT, -)\n"); 
-    #endif
     return NOT; 
 }
 
 "("	{ 
-    #ifdef DEBUG
     printf("(LP, -)\n"); 
-    #endif
     return LP; 
 }
 
-")"	{
-    #ifdef DEBUG 
+")"	{  
     printf("(RP, -)\n"); 
-    #endif
     return RP; 
 }
 
 "{"	{ 
-    #ifdef DEBUG
-    printf("(LC, -)\n"); 
-    #endif
+    printf("(LC, -)\n");  
     return LC; 
 }
 
 "}"	{ 
-    #ifdef DEBUG
     printf("(RC, -)\n"); 
-    #endif
     return RC; 
 }
 
 "[" { 
-    #ifdef DEBUG
-    printf("(LS, -)\n"); 
-    #endif
+    printf("(LS, -)\n");  
     return LS; 
 }
 
-"]" { 
-    #ifdef DEBUG
-    printf("(RS, -)\n"); 
-    #endif
+"]" {  
+    printf("(RS, -)\n");   
     return RS; 
 }
 
 [ \r\n\t]   {}
 
-({int}|{hex}|{float}|(({int}|{float}){expo}))[\.a-zA-Z_][\.a-zA-Z_0-9]* { 
+({int}|{float}|({int}|{float}))[\.a-zA-Z_][\.a-zA-Z_0-9]* { 
     printf("Lex Error: invalid identifier \"%s\" at line %d\n", yytext, yylineno); 
 }
 

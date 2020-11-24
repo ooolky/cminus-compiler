@@ -1,16 +1,19 @@
 int a;
-
-int tester(int d) {
-  return (d + d);
-}
+char b;
+float c;
 
 void main() {
-  int a;
-  int c;
+  a = 4;
+  b = '1';
+  c = 4.0;
 
-  a = 3;
-  c = a + a;
-  tester(c);
+  while(a > 0)
+  {
+    a=a-1;
+    if(a=3) continue;
+    c=c-1;
+    if(a=2) break;
+  }
 }
 
 
