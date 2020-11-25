@@ -1,6 +1,7 @@
 int a;
 char b;
 float c;
+int d[10];
 
 void main() {
   a = 4;

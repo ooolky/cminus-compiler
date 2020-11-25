@@ -260,12 +260,12 @@ void display(struct ASTNode *T,int indent) {
             printf("%*cARRAY_SUB_LIST:\n", indent+3, ' '); 
             display(T->ptr[1], indent+6);
             break;
-        case DIMENSION: ````````
+        case DIMENSION: 
              printf("%*cID:  %s\n",indent,' ',T->type_id);
              display(T->ptr[0],indent);
              break;
         case DIMENSION_LIST: 
-             printf("%*:  %s\n",indent,' ',T->type_int);
+             printf("%*cLength:  %d\n",indent,' ',T->type_int);
              display(T->ptr[1],indent);
              break;
         }

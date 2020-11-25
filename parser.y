@@ -33,7 +33,7 @@ extern int hasError;
 %token <type_float> FLOAT                   
 %token <type_char> CHAR
 
-%token LP RP LC RC LS RS SEMI COMMA         
+%token LP RP LC RC LS RS SEMI COMMA LB RB        
 %token PLUS MINUS STAR DIV MOD ASSIGNOP AND OR NOT
 %token BITAND BITOR BITXOR BITSHL BITSHR
 %token IF ELSE WHILE RETURN CONTINUE BREAK
@@ -180,7 +180,7 @@ ArrayInitList: LC Args RC { $$ = mknode(1, ARRAY_INIT_LIST, yylineno, $2); }
 ;
 
 DimensionList:LB INT RB {$$=mknode(1,DIMENSION_LIST,yylineno,$2);$$->type_int=$2;}
- |LB INT RB DimensionList {$$=mknode(2,DIMENSION_LIST,yylineno,$2,$4);$$->type_int=$2;}
+ | LB INT RB DimensionList {$$=mknode(2,DIMENSION_LIST,yylineno,$2,$4);$$->type_int=$2;}
  ;
        
 %%
