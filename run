@@ -1,7 +1,6 @@
     #!/bin/bash
 	bison -d -v parser.y
 	flex lex.l 
-	g++ -o ./cminus parser.tab.c lex.yy.c ast.c analysis.cpp -lfl
+	g++ -o  ./cminus parser.tab.c lex.yy.c ast.c analysis.cpp tac.cpp -lfl 
     ./cminus test.c --> temp.txt
     rm parser.tab.c lex.yy.c parser.tab.h parser.output 
-    rm cminus

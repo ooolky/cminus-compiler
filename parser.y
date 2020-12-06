@@ -63,6 +63,7 @@ extern int hasError;
 Program: ExtDefList {
     display($1, 0);
     analysis($1);
+    displayTAC($1);
     if (hasError) {
         fprintf(stderr, "Detect fatal errors, compiler terminated!\n");
         exit(-1);

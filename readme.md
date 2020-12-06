@@ -1,4 +1,4 @@
-CMinus:
+CMinus
 
 float int char 数组（只能定义）
 算术运算 比较运算 自增自减运算 复合赋值运算

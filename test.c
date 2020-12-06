@@ -1,20 +1,28 @@
+  /*CMinus*/
 int a;
 char b;
 float c;
-int d[10];
+int b;
+
+void dec(int f)
+{
+  return f;
+}
 
 void main() {
-  a = 4;
+  a = 5;
   b = '1';
   c = 4.0;
 
-  while(a > 0)
+  f=1;
+
+  while(1 > a )
   {
-    a=a-1;
-    if(a=3) continue;
-    c=c-1;
+    if(a=3)  c--;
     if(a=2) break;
   }
+
+  decc(c);
 }
 
 
